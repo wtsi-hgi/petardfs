@@ -15,6 +15,86 @@ support for errors such as EAGAIN and EINTR where petardfs will only report such
 transient errors a nominated number of times, handy for testing applications support 
 such IO conditions gracefully.
 
+XML Configuration File
+======================
+
+An example configuration file can be found within the source tree at:  testsuite/sampledata/config-simple-filesystem-simple-error-in-read-file1.xml
+
+A basic configuation might look like:
+```xml
+<!DOCTYPE petardfs-config [
+<!ENTITY EPERM   "1">
+<!ENTITY ENOENT   "2">
+<!ENTITY ESRCH   "3">
+<!ENTITY EINTR   "4">
+<!ENTITY EIO   "5">
+<!ENTITY ENXIO   "6">
+<!ENTITY E2BIG   "7">
+<!ENTITY ENOEXEC   "8">
+<!ENTITY EBADF   "9">
+<!ENTITY ECHILD  "10">
+<!ENTITY EAGAIN  "11">
+<!ENTITY ENOMEM  "12">
+<!ENTITY EACCES  "13">
+<!ENTITY EFAULT  "14">
+<!ENTITY ENOTBLK  "15">
+<!ENTITY EBUSY  "16">
+<!ENTITY EEXIST  "17">
+<!ENTITY EXDEV  "18">
+<!ENTITY ENODEV  "19">
+<!ENTITY ENOTDIR  "20">
+<!ENTITY EISDIR  "21">
+<!ENTITY EINVAL  "22">
+<!ENTITY ENFILE  "23">
+<!ENTITY EMFILE  "24">
+<!ENTITY ENOTTY  "25">
+<!ENTITY ETXTBSY  "26">
+<!ENTITY EFBIG  "27">
+<!ENTITY ENOSPC  "28">
+<!ENTITY ESPIPE  "29">
+<!ENTITY EROFS  "30">
+<!ENTITY EMLINK  "31">
+<!ENTITY EPIPE  "32">
+<!ENTITY EDOM  "33">
+<!ENTITY ERANGE  "34">
+]>
+<petardfs-config>
+   <errors>
+     <read>
+       <error path="/read-eintr-10.txt">
+         <n start-offset="1" end-offset="1" error-code="&EINTR;" times="10"/>
+       </error>
+       <error path="/read-eio.txt">
+         <n start-offset="2" end-offset="2" error-code="&EIO;"/>
+       </error>
+     </read>
+     <write>
+       <error path="/write-eio.txt">
+         <n start-offset="2" end-offset="2" error-code="&EIO;"/>
+       </error>
+     </write>
+     <open>
+       <error path="/open-eio.txt" error-code="&EIO;" />
+     </open>
+   </errors>
+</petardfs-config>
+```
+
+The `read`, `write`, and `open` elements represent the filesystem operation on which the errors 
+contained within should be injected. Some operations (e.g. `read` and `write`) require an `n` element 
+within the `error` element to specify which `error-code` should be introduced at which ranges of bytes 
+(from `start-offset` to `end-offset`), while others (e.g. `open`) do not require that and can have 
+the `error-code` specified in the `error` element itself. 
+
+The full list of operations which are supported for error injection are: `read`, `write`, `fsync`, 
+`mkdir`, `symlink`, `unlink`, `rmdir`, `rename`, `link`, `chmod`, `chown`, `ftruncate`, `utime`, and 
+`open`.
+
+The list of error codes supported should be given as XML entity declarations at the top of each XML file. 
+The full list is given in the above example. 
+
+The `path` within each `error` element is relative to the mount point of the filesystem. 
+
 Usage Example
 =============
 
